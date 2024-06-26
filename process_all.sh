@@ -29,22 +29,19 @@ extract_and_translate_subtitles() {
         exit 1
     fi
 
-    # Try to fetch Chinese (Traditional) subtitles and translate to English
-    if echo "$languages" | grep -q 'zh-Hant'; then
+    if echo "$languages" | grep -q 'en'; then
+        echo "Using English subtitles as a fallback."
+        subtitles=$(youtube_transcript_api "$video_id" --languages en)
+    # Check if Chinese subtitles are available and can be translated to English
+    elif echo "$languages" | grep -q 'zh-Hant'; then
         echo "Chinese (Traditional) subtitles are available for translation."
         subtitles=$(youtube_transcript_api "$video_id" --languages zh-Hant --translate en)
     elif echo "$languages" | grep -q 'zh'; then
         echo "Chinese subtitles are available for translation."
         subtitles=$(youtube_transcript_api "$video_id" --languages zh --translate en)
     else
-        echo "Checking for English subtitles as a fallback..."
-        if echo "$languages" | grep -q 'en'; then
-            echo "English subtitles are available."
-            subtitles=$(youtube_transcript_api "$video_id" --languages en)
-        else
-            echo "No translatable subtitles found."
-            exit 1
-        fi
+        echo "No translatable subtitles found."
+        exit 1
     fi
 
     if [[ -z "$subtitles" ]]; then
